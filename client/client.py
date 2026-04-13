@@ -1,9 +1,10 @@
 import socket
 import threading
-
+#Utilisation HOST & PORT car fonction socket stream
 HOST = '127.0.0.1'
 PORT = 5555
 
+#Fonction d'écoute en continu les messages d'autres utilisateurs et les affiches
 def receive_messages(client):
     while True:
         try:
@@ -14,6 +15,7 @@ def receive_messages(client):
             client.close()
             break
 
+#Fonction de création d'un utilisateur et demarre le chat
 def start_client():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((HOST, PORT))
