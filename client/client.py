@@ -1,22 +1,50 @@
 import socket
 import threading
-#Utilisation HOST & PORT car fonction socket stream
+from crypto import cesar_encrypt, cesar_decrypt, vigenere_encrypt, vigenere_decrypt
+
 HOST = '127.0.0.1'
 PORT = 5555
 
-#Fonction d'écoute en continu les messages d'autres utilisateurs et les affiches
+# Choix de l'algorithme et de la clé
+ALGO = "vigenere"   # "cesar" ou "vigenere"
+CESAR_KEY = 3
+VIGENERE_KEY = "guardia"
+
+def encrypt(message):
+    """Chiffre un message selon l'algorithme choisi."""
+    if ALGO == "cesar":
+        return cesar_encrypt(message, CESAR_KEY)
+    elif ALGO == "vigenere":
+        return vigenere_encrypt(message, VIGENERE_KEY)
+    return message
+
+def decrypt(message):
+    """Déchiffre un message selon l'algorithme choisi."""
+    if ALGO == "cesar":
+        return cesar_decrypt(message, CESAR_KEY)
+    elif ALGO == "vigenere":
+        return vigenere_decrypt(message, VIGENERE_KEY)
+    return message
+
 def receive_messages(client):
+    """Écoute en continu les messages entrants, les déchiffre et les affiche."""
     while True:
         try:
             message = client.recv(1024).decode()
-            print(message, end='')
+            # On déchiffre uniquement la partie après "pseudo: "
+            if ": " in message:
+                prefix, content = message.split(": ", 1)
+                decrypted = decrypt(content.strip())
+                print(f"{prefix}: {decrypted}")
+            else:
+                print(message, end='')
         except:
             print("[!] Connexion perdue.")
             client.close()
             break
 
-#Fonction de création d'un utilisateur et demarre le chat
 def start_client():
+    """Initialise la connexion, enregistre le pseudo et démarre le chat chiffré."""
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((HOST, PORT))
 
@@ -25,6 +53,8 @@ def start_client():
     nickname = input()
     client.send(nickname.encode())
 
+    print(f"[*] Chiffrement actif : {ALGO.upper()}")
+
     thread = threading.Thread(target=receive_messages, args=(client,))
     thread.daemon = True
     thread.start()
@@ -32,7 +62,8 @@ def start_client():
     while True:
         try:
             message = input()
-            client.send(f"{nickname}: {message}\n".encode())
+            encrypted = encrypt(message)
+            client.send(f"{nickname}: {encrypted}\n".encode())
         except KeyboardInterrupt:
             client.close()
             break
