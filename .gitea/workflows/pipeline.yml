@@ -32,7 +32,7 @@ jobs:
 
       - name: SCA - Safety
         run: |
-          safety check --exit-zero
+          safety check --exit-code 0 || true
 
       - name: Upload security reports
         uses: actions/upload-artifact@v3
