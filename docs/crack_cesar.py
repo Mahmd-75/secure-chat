@@ -32,9 +32,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         texte = " ".join(sys.argv[1:])
     else:
-        texte = "Bonjour, je chiffre les messages!"
+        texte = "Bonjour c'est Nayar, je chiffre pas les messages!"
 
-    cle = 3
+    cle = 7
     chiffre = cesar_encrypt(texte, cle)
     print(f"Texte original  : {texte}")
     print(f"Clé utilisée    : {cle}")
