@@ -27,16 +27,8 @@ jobs:
 
       - name: SAST - Bandit
         run: |
-          bandit -r server/ client/ attacker/ --exit-zero -f json -o bandit-report.json
           bandit -r server/ client/ attacker/ --exit-zero
 
       - name: SCA - Safety
         run: |
           safety check --exit-code 0 || true
-
-      - name: Upload security reports
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: security-reports
-          path: bandit-report.json
