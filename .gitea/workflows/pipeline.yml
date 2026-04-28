@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI Security Pipeline
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build:
+  security:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,9 +19,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install bandit
+          pip install bandit safety flake8 cryptography
 
-      - name: Run SAST (Bandit)
+      - name: Lint (flake8)
         run: |
-          bandit -r . --exit-zero -f json -o bandit-report.json
-          echo "SAST scan complete"
+          flake8 . --max-line-length=120 --exclude=__pycache__ --exit-zero
+
+      - name: SAST - Bandit
+        run: |
+          bandit -r server/ client/ attacker/ --exit-zero -f json -o bandit-report.json
+          bandit -r server/ client/ attacker/ --exit-zero
+
+      - name: SCA - Safety
+        run: |
+          safety check --exit-zero
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: bandit-report.json
